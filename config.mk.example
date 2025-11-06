@@ -1,22 +1,14 @@
 # Web Client Deployment Configuration
 # Copy this file to config.mk and edit with your values
-#
-# Usage:
-#   cp config.mk.example config.mk
-#   # Edit config.mk
-#   make deploy
-
-# AWS Region for S3 bucket
 REGION = eu-west-2
+DEPLOYMENT_DOMAIN = example.com
+JMAP_API_URL = https://jmap.example.com
 
-# Domain to deploy web client
-# Can be:
-#   - Root domain: jmapbox.com
-#   - Subdomain: app.jmapbox.com
-#   - Different domain: otherdomain.com
-DEPLOYMENT_DOMAIN = jmapbox.com
+# Deployment mode: 'separate' (own CloudFront) or 'shared' (use server CloudFront)
+# This will be set automatically on first deployment
+DEPLOYMENT_MODE = 
 
-# JMAP Server URL (for API calls)
-# This must match your JMAP server deployment
-JMAP_API_URL = https://jmap.jmapbox.com
+# Server CloudFront distribution ID (required when DEPLOYMENT_MODE = shared)
+# Leave empty if using separate mode
+SERVER_CLOUDFRONT_ID =
 

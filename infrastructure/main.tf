@@ -22,17 +22,20 @@ locals {
 
 ########################
 # ACM Certificate (CloudFront - must be in us-east-1)
+# Only needed for separate deployment mode
 ########################
 
 resource "aws_acm_certificate" "root_cf" {
+  count             = var.deployment_mode == "separate" ? 1 : 0
   provider          = aws.us_east_1
   domain_name       = var.deployment_domain
   validation_method = "DNS"
 }
 
 resource "aws_acm_certificate_validation" "root_cf" {
+  count           = var.deployment_mode == "separate" ? 1 : 0
   provider        = aws.us_east_1
-  certificate_arn = aws_acm_certificate.root_cf.arn
+  certificate_arn = aws_acm_certificate.root_cf[0].arn
 }
 
 ########################
@@ -106,15 +109,17 @@ resource "aws_s3_object" "site_files" {
 
 ########################
 # CloudFront Distribution (Pure SPA Hosting)
+# Only created in "separate" deployment mode
 ########################
 
 resource "aws_cloudfront_distribution" "root" {
-  enabled             = true
-  aliases             = [var.deployment_domain]
-  default_root_object = "index.html"
-  price_class         = "PriceClass_100"
-  is_ipv6_enabled     = true
-  comment             = "JMAP Web Client - Pure SPA"
+  count                = var.deployment_mode == "separate" ? 1 : 0
+  enabled              = true
+  aliases              = [var.deployment_domain]
+  default_root_object  = "index.html"
+  price_class          = "PriceClass_100"
+  is_ipv6_enabled      = true
+  comment              = "JMAP Web Client - Pure SPA"
 
   # S3 origin for web app (ONLY S3 - no JMAP API origin)
   origin {
@@ -168,11 +173,11 @@ resource "aws_cloudfront_distribution" "root" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate_validation.root_cf.certificate_arn
+    acm_certificate_arn      = aws_acm_certificate_validation.root_cf[0].certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
-  depends_on = [aws_acm_certificate_validation.root_cf]
+  depends_on = [aws_acm_certificate_validation.root_cf[0]]
 }
 

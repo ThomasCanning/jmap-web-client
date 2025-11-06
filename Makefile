@@ -10,7 +10,7 @@ build:
 	VITE_API_URL=$(JMAP_API_URL) npm run build
 	@echo "✓ Build complete"
 
-deploy: ensure-config build tf-apply
+deploy: ensure-config ensure-deployment-mode build tf-apply
 	@echo ""
 	@echo "✓ Deployment complete!"
 	@echo ""
@@ -22,6 +22,8 @@ tf-apply:
 	AWS_REGION=$(REGION) terraform -chdir=$(TF_DIR) apply \
 		-var="region=$(REGION)" \
 		-var="deployment_domain=$(DEPLOYMENT_DOMAIN)" \
+		-var="deployment_mode=$(DEPLOYMENT_MODE)" \
+		-var="server_cloudfront_id=$(SERVER_CLOUDFRONT_ID)" \
 		-auto-approve
 
 ensure-config:
@@ -29,10 +31,41 @@ ensure-config:
 	  echo "ERROR: Set REGION, DEPLOYMENT_DOMAIN, and JMAP_API_URL in config.mk"; \
 	  exit 1; \
 	fi
-	@if [ ! -f .env.production ]; then \
-	  echo "WARNING: .env.production not found. Copy from .env.production.example"; \
-	  echo "  cp .env.production.example .env.production"; \
-	  echo "  # Edit .env.production with your JMAP server URL"; \
+
+ensure-deployment-mode:
+	@if [ -z "$(DEPLOYMENT_MODE)" ]; then \
+	  echo ""; \
+	  echo "=========================================="; \
+	  echo "Deployment Mode Selection"; \
+	  echo "=========================================="; \
+	  echo ""; \
+	  echo "Choose deployment mode:"; \
+	  echo "  1) separate - Create own CloudFront distribution (use when client and server are on different domains)"; \
+	  echo "  2) shared   - Use existing server CloudFront (use when client and server share the same domain)"; \
+	  echo ""; \
+	  read -p "Enter choice [1 or 2]: " choice; \
+	  if [ "$$choice" = "1" ]; then \
+	    echo "DEPLOYMENT_MODE = separate" >> config.mk; \
+	    echo ""; \
+	    echo "✓ Deployment mode saved to config.mk"; \
+	    echo ""; \
+	  elif [ "$$choice" = "2" ]; then \
+	    echo ""; \
+	    read -p "Enter server CloudFront distribution ID: " cf_id; \
+	    echo "DEPLOYMENT_MODE = shared" >> config.mk; \
+	    echo "SERVER_CLOUDFRONT_ID = $$cf_id" >> config.mk; \
+	    echo ""; \
+	    echo "✓ Deployment mode saved to config.mk"; \
+	    echo ""; \
+	  else \
+	    echo "ERROR: Invalid choice. Must be 1 or 2."; \
+	    exit 1; \
+	  fi; \
+	fi
+	@if [ "$(DEPLOYMENT_MODE)" = "shared" ] && [ -z "$(SERVER_CLOUDFRONT_ID)" ]; then \
+	  echo "ERROR: SERVER_CLOUDFRONT_ID is required when DEPLOYMENT_MODE = shared"; \
+	  echo "Set it in config.mk or run 'make deploy' again to set it interactively"; \
+	  exit 1; \
 	fi
 
 dev:
