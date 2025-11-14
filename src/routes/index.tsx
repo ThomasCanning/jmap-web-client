@@ -1,39 +1,35 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { loginWithBasic, getApiBaseUrl } from '@/lib/api'
+import { useLogin } from '@/lib/auth'
 
 export const Route = createFileRoute('/')({
   component: LoginPage,
 })
 
 function LoginPage() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({})
+  const [authServerUrl, setAuthServerUrl] = useState('')
+  const [validationErrors, setValidationErrors] = useState<{ 
+    email?: string
+    password?: string
+    authServerUrl?: string
+  }>({})
 
-  const loginMutation = useMutation({
-    mutationFn: ({ email, password }: { email: string; password: string }) =>
-      loginWithBasic(email, password),
-    onSuccess: () => {
-      // Navigate to session page on successful login
-      navigate({ to: '/session' })
-    },
-  })
+  const loginMutation = useLogin()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Custom validation
-    const errors: { email?: string; password?: string } = {}
+    const errors: { email?: string; password?: string; authServerUrl?: string } = {}
     if (!email.trim()) {
-      errors.email = 'Email or username is required'
+      errors.email = 'Email is required'
     }
     if (!password) {
       errors.password = 'Password is required'
@@ -45,7 +41,8 @@ function LoginPage() {
     }
 
     setValidationErrors({})
-    loginMutation.mutate({ email, password })
+
+    loginMutation.mutate({ email, password, authServerUrl: authServerUrl.trim() || undefined })
   }
 
   return (
@@ -74,10 +71,10 @@ function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email / Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value)
@@ -87,7 +84,7 @@ function LoginPage() {
                   }}
                   disabled={loginMutation.isPending}
                   placeholder="user@example.com"
-                  autoComplete="username"
+                  autoComplete="email"
                   aria-invalid={!!validationErrors.email}
                 />
                 {validationErrors.email && (
@@ -116,18 +113,43 @@ function LoginPage() {
                   <p className="text-sm text-destructive">{validationErrors.password}</p>
                 )}
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="authServerUrl">Auth Server URL (optional)</Label>
+                <Input
+                  id="authServerUrl"
+                  type="url"
+                  value={authServerUrl}
+                  onChange={(e) => {
+                    setAuthServerUrl(e.target.value)
+                    if (validationErrors.authServerUrl) {
+                      setValidationErrors((prev) => ({ ...prev, authServerUrl: undefined }))
+                    }
+                  }}
+                  disabled={loginMutation.isPending}
+                  placeholder="https://api.jmapbox.com"
+                  autoComplete="url"
+                  aria-invalid={!!validationErrors.authServerUrl}
+                />
+                {validationErrors.authServerUrl && (
+                  <p className="text-sm text-destructive">{validationErrors.authServerUrl}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to use default server URL. The JMAP session URL will be auto-discovered from your email domain.
+                </p>
+              </div>
             </CardContent>
             <CardFooter className="pt-0">
-              <Button type="submit" disabled={loginMutation.isPending} className="w-full">
+              <Button 
+                type="submit" 
+                disabled={loginMutation.isPending} 
+                className="w-full"
+              >
                 {loginMutation.isPending ? 'Logging in...' : 'Login'}
               </Button>
             </CardFooter>
           </form>
         </Card>
-
-        <div className="text-center text-xs text-muted-foreground">
-          API Base: <code className="bg-muted px-1 py-0.5 rounded">{getApiBaseUrl()}</code>
-        </div>
       </div>
     </div>
   )

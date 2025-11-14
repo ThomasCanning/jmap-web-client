@@ -28,7 +28,7 @@ The web client supports two deployment modes:
 1. Configure deployment settings:
 ```bash
 cp config.mk.example config.mk
-# Edit config.mk: set REGION, DEPLOYMENT_DOMAIN, JMAP_API_URL
+# Edit config.mk: set REGION and DEPLOYMENT_DOMAIN
 ```
 
 2. Configure AWS credentials (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html):
@@ -98,4 +98,19 @@ make deploy
    curl https://your-domain.com                    # Should serve web client
    curl https://your-domain.com/.well-known/jmap   # Should serve autodiscovery
    ```
+
+## Updating the Website
+
+After making changes to the web client code, you can redeploy just the website files (without touching infrastructure) using:
+
+```bash
+make site
+```
+
+This command will:
+1. Build the web client
+2. Upload the updated files to S3
+3. Skip all infrastructure changes (CloudFront, certificates, etc.)
+
+**Note:** CloudFront cache may take a few minutes to invalidate. Changes should be visible within 5-10 minutes.
 

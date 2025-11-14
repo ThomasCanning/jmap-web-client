@@ -108,6 +108,43 @@ resource "aws_s3_object" "site_files" {
 }
 
 ########################
+# CloudFront Function for SPA Routing
+# Only created in "separate" deployment mode
+########################
+
+resource "aws_cloudfront_function" "spa_routing" {
+  count    = var.deployment_mode == "separate" ? 1 : 0
+  name     = "jmap-web-spa-routing-${replace(var.deployment_domain, ".", "-")}"
+  runtime  = "cloudfront-js-1.0"
+  comment  = "SPA routing: rewrite requests without file extensions to index.html"
+  publish  = true
+  code     = <<-EOT
+function handler(event) {
+    var request = event.request;
+    var uri = request.uri;
+    
+    // Check if the URI has a file extension (e.g., .js, .css, .png, etc.)
+    // If it does, let it pass through normally - these are actual assets
+    if (uri.match(/\.[a-zA-Z0-9]+$/)) {
+        return request;
+    }
+    
+    // Handle root path
+    if (uri === '/') {
+        request.uri = '/index.html';
+        return request;
+    }
+    
+    // If the URI doesn't have a file extension, it's a route
+    // Rewrite it to index.html for SPA routing
+    request.uri = '/index.html';
+    
+    return request;
+}
+EOT
+}
+
+########################
 # CloudFront Distribution (Pure SPA Hosting)
 # Only created in "separate" deployment mode
 ########################
@@ -141,6 +178,12 @@ resource "aws_cloudfront_distribution" "root" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
+    # Use CloudFront Function for SPA routing
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_routing[0].arn
+    }
+
     forwarded_values {
       query_string = false
       cookies {
@@ -153,16 +196,17 @@ resource "aws_cloudfront_distribution" "root" {
     max_ttl     = 86400
   }
 
-  # SPA routing: return index.html for 404/403
+  # Fallback error responses (should rarely be hit now with the function)
+  # These are kept as a safety net, but the CloudFront Function handles most cases
   custom_error_response {
     error_code         = 404
-    response_code      = 200
+    response_code      = 404
     response_page_path = "/index.html"
   }
 
   custom_error_response {
     error_code         = 403
-    response_code      = 200
+    response_code      = 403
     response_page_path = "/index.html"
   }
 

@@ -2,12 +2,15 @@
 
 TF_DIR ?= infrastructure
 
-.PHONY: build deploy tf-apply ensure-config dev clean
+.PHONY: build deploy site tf-apply ensure-config dev clean
 
 build:
 	@echo "Building web client..."
 	npm ci
-	VITE_API_URL=$(JMAP_API_URL) npm run build
+	@if [ -n "$(AUTH_LOGIN_ENDPOINT)" ]; then \
+		echo "VITE_AUTH_LOGIN_ENDPOINT=$(AUTH_LOGIN_ENDPOINT)" > .env.local; \
+	fi
+	npm run build
 	@echo "✓ Build complete"
 
 deploy: ensure-config ensure-deployment-mode build tf-apply
@@ -15,6 +18,21 @@ deploy: ensure-config ensure-deployment-mode build tf-apply
 	@echo "✓ Deployment complete!"
 	@echo ""
 	@echo "Check terraform output above for DNS setup instructions."
+
+site: ensure-config build
+	@echo "Uploading website files to S3..."
+	AWS_REGION=$(REGION) terraform -chdir=$(TF_DIR) init -upgrade
+	AWS_REGION=$(REGION) terraform -chdir=$(TF_DIR) apply \
+		-target=aws_s3_object.site_files \
+		-var="region=$(REGION)" \
+		-var="deployment_domain=$(DEPLOYMENT_DOMAIN)" \
+		-var="deployment_mode=$(DEPLOYMENT_MODE)" \
+		-var="server_cloudfront_id=$(SERVER_CLOUDFRONT_ID)" \
+		-auto-approve
+	@echo ""
+	@echo "✓ Website files uploaded!"
+	@echo ""
+	@echo "Note: CloudFront cache may take a few minutes to invalidate."
 
 tf-apply:
 	@echo "Deploying infrastructure..."
@@ -27,8 +45,8 @@ tf-apply:
 		-auto-approve
 
 ensure-config:
-	@if [ -z "$(REGION)" ] || [ -z "$(DEPLOYMENT_DOMAIN)" ] || [ -z "$(JMAP_API_URL)" ]; then \
-	  echo "ERROR: Set REGION, DEPLOYMENT_DOMAIN, and JMAP_API_URL in config.mk"; \
+	@if [ -z "$(REGION)" ] || [ -z "$(DEPLOYMENT_DOMAIN)" ]; then \
+	  echo "ERROR: Set REGION and DEPLOYMENT_DOMAIN in config.mk"; \
 	  exit 1; \
 	fi
 
@@ -69,11 +87,7 @@ ensure-deployment-mode:
 	fi
 
 dev:
-	@if [ -z "$(JMAP_API_URL)" ]; then \
-	  echo "ERROR: Set JMAP_API_URL in config.mk"; \
-	  exit 1; \
-	fi
-	VITE_API_URL=$(JMAP_API_URL) npm run dev
+	npm run dev
 
 clean:
 	rm -rf dist node_modules

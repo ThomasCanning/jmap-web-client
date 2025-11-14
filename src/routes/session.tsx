@@ -1,35 +1,23 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
+import type { Session } from '@/lib/jmap'
+import { useSession } from '@/lib/jmap'
+import { useLogout } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { fetchSession, logout, type Session } from '@/lib/api'
 
 export const Route = createFileRoute('/session')({
   component: SessionPage,
 })
 
 function SessionPage() {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
-  // Query for session data - enabled by default, but can be refetched
-  const sessionQuery = useQuery({
-    queryKey: ['session'],
-    queryFn: fetchSession,
-    enabled: false, // Don't auto-fetch, wait for button click
+  const sessionQuery = useSession({
+    enabled: false,
     retry: false,
   })
 
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      // Invalidate session query and navigate to login
-      queryClient.invalidateQueries({ queryKey: ['session'] })
-      navigate({ to: '/' })
-    },
-  })
+  const logoutMutation = useLogout()
 
   const handleFetchSession = () => {
     sessionQuery.refetch()
@@ -64,7 +52,7 @@ function SessionPage() {
                 <AlertDescription>
                   {sessionQuery.error instanceof Error
                     ? sessionQuery.error.message
-                    : 'Failed to fetch session'}
+                    : 'Failed to fetch session.ts'}
                 </AlertDescription>
               </Alert>
             )}
@@ -75,8 +63,8 @@ function SessionPage() {
 
             {!sessionQuery.data && !sessionQuery.isFetching && !sessionQuery.isError && (
               <p className="text-sm text-muted-foreground">
-                Click "Fetch Session" to retrieve your session information using Bearer authentication
-                (cookies).
+                Click "Fetch Session" to retrieve your JMAP session information. 
+                Authentication is handled automatically via cookies set during login.
               </p>
             )}
           </CardContent>
