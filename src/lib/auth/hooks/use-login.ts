@@ -1,21 +1,22 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { login } from '../services/login'
+import { postLogin, type LoginResponse } from '../http/login'
 
-export interface UseLoginOptions {
-  onSuccess?: () => void
-}
-
-export function useLogin(options?: UseLoginOptions) {
+export function useLogin() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  return useMutation<void, Error, { email: string; password: string; authServerUrl?: string }>({
-    mutationFn: async ({ email, password, authServerUrl }) => {
-      return login(email, password, authServerUrl)
+  return useMutation<LoginResponse, Error, { username: string; password: string }>({
+    mutationKey: ['login'],
+    mutationFn: async ({ username, password }: { username: string; password: string }) => {
+      return postLogin(username, password)
     },
-    onSuccess: () => {
-      options?.onSuccess?.()
-      navigate({ to: '/session' })
+    onSuccess: (data: LoginResponse) => {
+      if (data.success) {
+        // Invalidate session query to refetch with new authentication
+        queryClient.invalidateQueries({ queryKey: ['session'] })
+        navigate({ to: '/session' })
+      }
     },
   })
 }

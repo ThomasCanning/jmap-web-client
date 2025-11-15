@@ -2,15 +2,16 @@
 
 TF_DIR ?= infrastructure
 
-.PHONY: build deploy site tf-apply ensure-config dev clean
+.PHONY: build deploy site tf-apply ensure-config local clean
 
 build:
 	@echo "Building web client..."
 	npm ci
-	@if [ -n "$(AUTH_LOGIN_ENDPOINT)" ]; then \
-		echo "VITE_AUTH_LOGIN_ENDPOINT=$(AUTH_LOGIN_ENDPOINT)" > .env.local; \
+	@if [ -n "$(SERVER_URL)" ]; then \
+		VITE_SERVER_URL=$(SERVER_URL) npm run build; \
+	else \
+		npm run build; \
 	fi
-	npm run build
 	@echo "✓ Build complete"
 
 deploy: ensure-config ensure-deployment-mode build tf-apply
@@ -86,7 +87,9 @@ ensure-deployment-mode:
 	  exit 1; \
 	fi
 
-dev:
+local:
+	@rm -f .env.local
+	@echo "VITE_SERVER_URL=http://localhost:3001" > .env.local
 	npm run dev
 
 clean:

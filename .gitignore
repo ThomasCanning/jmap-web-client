@@ -8,6 +8,7 @@ node_modules/
 dist/
 
 # Environment files
+.env.local
 .env.production
 
 # Terraform

@@ -1,20 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { logout } from '../services/logout'
+import { postLogout } from '../http/logout'
 
-export interface UseLogoutOptions {
-  onSuccess?: () => void
-}
-
-export function useLogout(options?: UseLogoutOptions) {
+export function useLogout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: () => logout(),
+    mutationKey: ['logout'],
+    mutationFn: async () => {
+      return postLogout()
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['session'] })
-      options?.onSuccess?.()
+      queryClient.clear()
       navigate({ to: '/' })
     },
   })

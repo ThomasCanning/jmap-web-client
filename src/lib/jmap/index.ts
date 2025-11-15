@@ -1,3 +1,3 @@
 export type { Session } from '../shared/types'
-export { useSession, type UseSessionOptions } from './hooks/use-session'
+export { useSession } from './hooks/use-session'
 

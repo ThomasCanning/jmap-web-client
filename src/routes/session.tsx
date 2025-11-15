@@ -11,17 +11,9 @@ export const Route = createFileRoute('/session')({
 })
 
 function SessionPage() {
-
-  const sessionQuery = useSession({
-    enabled: false,
-    retry: false,
-  })
+  const sessionQuery = useSession()
 
   const logoutMutation = useLogout()
-
-  const handleFetchSession = () => {
-    sessionQuery.refetch()
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -37,35 +29,22 @@ function SessionPage() {
             <CardDescription>Fetch and display your current JMAP session</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Button
-                onClick={handleFetchSession}
-                disabled={sessionQuery.isFetching}
-                variant="default"
-              >
-                {sessionQuery.isFetching ? 'Loading...' : 'Fetch Session'}
-              </Button>
-            </div>
+            {sessionQuery.isFetching && (
+              <p className="text-sm text-muted-foreground">Loading session...</p>
+            )}
 
             {sessionQuery.isError && (
               <Alert variant="destructive">
                 <AlertDescription>
                   {sessionQuery.error instanceof Error
                     ? sessionQuery.error.message
-                    : 'Failed to fetch session.ts'}
+                    : 'Failed to fetch session'}
                 </AlertDescription>
               </Alert>
             )}
 
             {sessionQuery.isSuccess && sessionQuery.data && (
               <SessionDisplay session={sessionQuery.data} />
-            )}
-
-            {!sessionQuery.data && !sessionQuery.isFetching && !sessionQuery.isError && (
-              <p className="text-sm text-muted-foreground">
-                Click "Fetch Session" to retrieve your JMAP session information. 
-                Authentication is handled automatically via cookies set during login.
-              </p>
             )}
           </CardContent>
           <CardFooter className="border-t pt-6">

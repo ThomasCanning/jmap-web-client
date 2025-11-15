@@ -11,9 +11,8 @@ DEPLOYMENT_MODE =
 # Leave empty if using separate mode
 SERVER_CLOUDFRONT_ID =
 
-# Auth login endpoint path (relative to server URL)
-# The client will POST username/password to this endpoint
-# The server should set access_token and refresh_token cookies and return {"success":true} or {"error":"..."}
-# Default: /auth/login
-AUTH_LOGIN_ENDPOINT = /auth/login
+# Server URL for API calls
+# The client will make requests to this server (e.g., https://api.jmapbox.com)
+# Default: https://api.jmapbox.com
+SERVER_URL = https://api.jmapbox.com
 
