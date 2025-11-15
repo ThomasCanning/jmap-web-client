@@ -8,6 +8,10 @@ Tailwindcss for styling and shadcn as a component library.
 **Important:** Ensure your client domain is added to the server's `ALLOWED_ORIGINS` configuration for CORS to work correctly.
 See [deployment.md](docs/deployment.md) for deployment instructions.
 
+Local testing
+
+Run frontend with make local. This will look for a backend hosted on 3001
+
 ## Resources
 
 - [JMAP Specification (RFC 8620)](https://jmap.io/)

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-export const Route = createFileRoute('/session')({
+export const Route = createFileRoute('/(authenticated)/session')({
   component: SessionPage,
 })
 

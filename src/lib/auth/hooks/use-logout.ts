@@ -12,6 +12,8 @@ export function useLogout() {
       return postLogout()
     },
     onSuccess: () => {
+      //Cancel queries to prevent page you're on refetching without auth and failing
+      queryClient.cancelQueries()
       queryClient.clear()
       navigate({ to: '/' })
     },
