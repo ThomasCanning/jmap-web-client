@@ -22,7 +22,7 @@ lint:
 
 test:
 	@echo "Running tests..."
-	npm test
+	@npm test
 	@echo "✓ Tests complete"
 
 deploy: ensure-config ensure-deployment-mode lint test build tf-apply

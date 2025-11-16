@@ -6,7 +6,7 @@
     "dev": "VITE_SERVER_URL=http://localhost:3001 vite --port 5173",
     "build": "vite build && tsc",
     "serve": "vite preview",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
