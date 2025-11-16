@@ -3,6 +3,7 @@
 Pure React SPA for JMAP servers (RFC 8620 compliant). A universal web client that works with any RFC 8620 compliant JMAP server. The client makes direct API calls to the JMAP server and supports RFC 8620 autodiscovery.
 Uses tanstack router for routing and tanstack query for API calls.
 Tailwindcss for styling and shadcn as a component library.
+
 ## Deployment
 
 **Important:** Ensure your client domain is added to the server's `ALLOWED_ORIGINS` configuration for CORS to work correctly.

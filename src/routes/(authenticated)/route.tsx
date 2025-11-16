@@ -1,16 +1,16 @@
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
-import { sessionQueryOptions } from '@/lib/jmap/hooks/use-session'
+import { createFileRoute, redirect, Outlet } from "@tanstack/react-router"
+import { sessionQueryOptions } from "@/lib/jmap/hooks/use-session"
 
-export const Route = createFileRoute('/(authenticated)')({
+export const Route = createFileRoute("/(authenticated)")({
   beforeLoad: async ({ context }) => {
     try {
       await context.queryClient.ensureQueryData(sessionQueryOptions)
     } catch {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw redirect({
-        to: '/login',
+        to: "/login",
       })
     }
   },
   component: () => <Outlet />,
 })
-

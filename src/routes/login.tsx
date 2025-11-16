@@ -1,36 +1,43 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useLogin } from '@/lib/auth'
+import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useLogin } from "@/lib/auth"
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   component: LoginPage,
 })
 
 function LoginPage() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [validationErrors, setValidationErrors] = useState<{ 
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const [validationErrors, setValidationErrors] = useState<{
     username?: string
     password?: string
   }>({})
 
   const authLogin = useLogin()
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     // Custom validation
     const errors: { username?: string; password?: string } = {}
     if (!username.trim()) {
-      errors.username = 'Username is required'
+      errors.username = "Username is required"
     }
     if (!password) {
-      errors.password = 'Password is required'
+      errors.password = "Password is required"
     }
 
     if (Object.keys(errors).length > 0) {
@@ -61,9 +68,7 @@ function LoginPage() {
               {authLogin.isError && (
                 <Alert variant="destructive">
                   <AlertDescription>
-                    {authLogin.error instanceof Error
-                      ? authLogin.error.message
-                      : 'Login failed'}
+                    {authLogin.error instanceof Error ? authLogin.error.message : "Login failed"}
                   </AlertDescription>
                 </Alert>
               )}
@@ -113,12 +118,8 @@ function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="pt-0">
-              <Button 
-                type="submit" 
-                disabled={authLogin.isPending} 
-                className="w-full"
-              >
-                {authLogin.isPending ? 'Logging in...' : 'Login'}
+              <Button type="submit" disabled={authLogin.isPending} className="w-full">
+                {authLogin.isPending ? "Logging in..." : "Login"}
               </Button>
             </CardFooter>
           </form>
@@ -127,4 +128,3 @@ function LoginPage() {
     </div>
   )
 }
-

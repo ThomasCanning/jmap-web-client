@@ -1,12 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
-import type { Session } from '@/lib/jmap'
-import { useSession } from '@/lib/jmap'
-import { useLogout } from '@/lib/auth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { createFileRoute } from "@tanstack/react-router"
+import type { Session } from "@/lib/jmap"
+import { useSession } from "@/lib/jmap"
+import { useLogout } from "@/lib/auth"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export const Route = createFileRoute('/(authenticated)/session')({
+export const Route = createFileRoute("/(authenticated)/session")({
   component: SessionPage,
 })
 
@@ -38,7 +45,7 @@ function SessionPage() {
                 <AlertDescription>
                   {sessionQuery.error instanceof Error
                     ? sessionQuery.error.message
-                    : 'Failed to fetch session'}
+                    : "Failed to fetch session"}
                 </AlertDescription>
               </Alert>
             )}
@@ -54,7 +61,7 @@ function SessionPage() {
               variant="destructive"
               className="w-full"
             >
-              {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
             </Button>
           </CardFooter>
         </Card>
@@ -68,23 +75,23 @@ function SessionDisplay({ session }: { session: Session }) {
     <div className="space-y-4 pt-4 border-t">
       <div className="space-y-2 text-sm">
         <div>
-          <span className="font-medium">API URL:</span>{' '}
+          <span className="font-medium">API URL:</span>{" "}
           <span className="text-muted-foreground">{session.apiUrl}</span>
         </div>
         <div>
-          <span className="font-medium">Capabilities:</span>{' '}
+          <span className="font-medium">Capabilities:</span>{" "}
           <span className="text-muted-foreground">
             {Object.keys(session.capabilities).length > 0
-              ? Object.keys(session.capabilities).join(', ')
-              : 'None'}
+              ? Object.keys(session.capabilities).join(", ")
+              : "None"}
           </span>
         </div>
         <div>
-          <span className="font-medium">Primary Accounts:</span>{' '}
+          <span className="font-medium">Primary Accounts:</span>{" "}
           <span className="text-muted-foreground">
             {Object.keys(session.primaryAccounts).length > 0
               ? Object.keys(session.primaryAccounts).length
-              : 'None'}
+              : "None"}
           </span>
         </div>
       </div>

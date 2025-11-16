@@ -1,9 +1,9 @@
-import { parseHttpError } from '../../shared/utils/error-handling'
-import { authFetch } from '../../shared/http/authFetch'
+import { parseHttpError } from "../../shared/utils/error-handling"
+import { authFetch } from "../../shared/http/authFetch"
 
 export async function postLogout(): Promise<void> {
-  const response = await authFetch('/auth/logout', {
-    method: 'POST',
+  const response = await authFetch("/auth/logout", {
+    method: "POST",
   })
 
   if (!response.ok) {
@@ -13,4 +13,3 @@ export async function postLogout(): Promise<void> {
 
   return
 }
-

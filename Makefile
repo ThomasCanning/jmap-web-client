@@ -2,7 +2,7 @@
 
 TF_DIR ?= infrastructure
 
-.PHONY: build deploy site tf-apply ensure-config local clean
+.PHONY: build deploy site tf-apply ensure-config local clean lint test
 
 build:
 	@echo "Building web client..."
@@ -14,7 +14,18 @@ build:
 	fi
 	@echo "✓ Build complete"
 
-deploy: ensure-config ensure-deployment-mode build tf-apply
+lint:
+	@echo "Running linter and formatter..."
+	npx eslint --fix "**/*.{ts,tsx}"
+	npx prettier --write "**/*.{ts,tsx,json,md}"
+	@echo "✓ Linting complete"
+
+test:
+	@echo "Running tests..."
+	npm test
+	@echo "✓ Tests complete"
+
+deploy: ensure-config ensure-deployment-mode lint test build tf-apply
 	@echo ""
 	@echo "✓ Deployment complete!"
 	@echo ""
